@@ -7,7 +7,7 @@ skills in any agent that reads `SKILL.md` files.
 
 | Plugin | What it gives the agent |
 |---|---|
-| `julien-skills` | Eight skills: see the table below. |
+| `julien-skills` | Nine skills: see the table below. |
 | `clean-code-guard` | A hook that checks each Python file the agent edits for Clean Code, SOLID and DRY problems the edit added, plus a skill with the rules. See [its README](plugins/clean-code-guard/README.md). |
 | `jev-skill-suggestion` | TypeSafe's Jev picks at most one skill per prompt and the skill list stays out of the context window. Claude Code and VS Code Copilot only. See [its README](plugins/jev-skill-suggestion/README.md). |
 
@@ -22,6 +22,7 @@ Skills in `julien-skills`:
 | `resolving-merge-conflicts` | Resolve a merge or rebase in progress. |
 | `teams-reader` | Read Microsoft Teams chats through the signed-in web app. Needs Node.js and Chrome. |
 | `ultraplan-local` | Write a deep implementation plan from parallel codebase analysis. |
+| `vscode-extension-test` | Test a VS Code extension in your own VS Code: install a build, run its commands, answer its dialogs, and check what the window shows. Windows only. |
 | `vscode-unblock` | Find and press the hidden VS Code dialog that blocks an agent. Windows only. |
 
 ## Install

@@ -36,7 +36,9 @@ pwsh -NoProfile -NonInteractive -File <this skill's folder>/scripts/vscode-windo
 ```
 
 `-Dialog` matches the dialog's title or text, and `-Press` is the exact button name from the scan. The script presses
-one button on the first matching dialog and prints `pressed: <name>`. It exits 1 when nothing matches.
+one button on the first matching dialog and prints `pressed: <name>`. It exits 1 when nothing matches. A task dialog
+whose buttons are command links (large buttons with a title, as in an extension's report with custom buttons) lists
+and presses them too, without taking focus.
 
 ## After pressing
 

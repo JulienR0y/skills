@@ -1,6 +1,6 @@
 {
   "name": "julien-skills",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Skills for peer sessions, code review, commits, merge conflicts, planning, Teams and VS Code.",
   "author": { "name": "Julien Roy" },
   "repository": "https://github.com/JulienR0y/skills",
@@ -13,6 +13,7 @@
     "./skills/resolving-merge-conflicts",
     "./skills/teams-reader",
     "./skills/ultraplan-local",
+    "./skills/vscode-extension-test",
     "./skills/vscode-unblock"
   ]
 }
