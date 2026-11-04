@@ -31,9 +31,9 @@ Layer 1 reads the Python syntax tree. It needs no network. It reports these prob
 | Copied code, or a helper that already exists elsewhere in the repository | any new one |
 | Test that calls a private method, or matches an error's message text | any new one |
 
-Layer 2 is optional. It sends each new or changed function to TypeSafe's Jev model and asks four questions. Does the
+Layer 2 runs when you have a TypeSafe API key. It sends each new or changed function to TypeSafe's Jev model and asks four questions. Does the
 function do more than one job? Does its name fail to describe what it does? Does it branch on a string or type tag
-that a table should replace? Does it build dependencies that it should receive instead? See "Turn on the Jev layer"
+that a table should replace? Does it build dependencies that it should receive instead? See "The Jev layer"
 below.
 
 Each finding is either a problem or a note. A problem blocks the agent in Claude Code until it fixes it or explains
@@ -54,7 +54,7 @@ inside a repository.
 | `skills/clean-code-guard/SKILL.md` | Tells the agent the rules, the limits and how to answer a finding. |
 | `scripts/code_smells.py` | The checker: hook mode, `--diff` mode, file mode and `--self-test`. |
 | `scripts/smell_rules.py` | The measurements behind layer 1. |
-| `scripts/jev_review.py` | Layer 2, the Jev questions. Off by default. |
+| `scripts/jev_review.py` | Layer 2, the Jev questions. On when `TYPESAFE_API_KEY` is set. |
 | `scripts/jev_calibrate.py` | Measures how precise each Jev question is, to decide which ones may block. |
 | `scripts/test_code_smells.py` | Tests for the checker. |
 | `scripts/install_copilot.py` | Installs the checker as a user-level VS Code Copilot hook. |
@@ -80,10 +80,10 @@ edit is checked twice.
 |---|---|---|
 | Claude Code | Blocks until the agent fixes it or keeps it with `# smell-ok` | Added to the agent's context |
 | Codex | Same as Claude Code. Approve the hook once after you install the plugin. | Added to the agent's context |
-| Copilot (CLI and VS Code) | Advice only: a Copilot `postToolUse` hook cannot block an edit | Added to the agent's context |
+| Copilot (CLI and VS Code) | The edit stays, but Copilot replaces the tool result with the problem, so the agent sees it at once | Added to the agent's context |
 
 To add the hook to VS Code Copilot without a plugin, run `python3 scripts/install_copilot.py` from a clone. It copies
-the checker to `~/.copilot/hooks/clean-code-guard/` and writes `~/.copilot/hooks/clean-code-guard.json`. Reload VS
+the checker and its Jev calibration to `~/.copilot/hooks/clean-code-guard/` and writes `~/.copilot/hooks/clean-code-guard.json`. Reload VS
 Code afterwards and run it again after each update.
 
 ## Run it from the command line
@@ -106,19 +106,18 @@ Both exit with code 1 when they find a problem, so they can run in CI or before 
 Sometimes the flagged code is right, for example a broad `except` at a boundary that must catch everything. Add
 `# smell-ok: <reason>` on the flagged line or the line above it. A `# smell-ok` without a reason does not count.
 
-## Turn on the Jev layer
+## The Jev layer
 
-The Jev layer is off by default. No API key ships with this plugin. Each user who wants it needs their own TypeSafe
-API key from https://typesafe.ai.
+The Jev layer is on whenever `TYPESAFE_API_KEY` is set. No API key ships with this plugin, so it stays off until
+you add your own key from https://typesafe.ai.
 
 When it is on, it sends the source of each new or changed function to `https://api.typesafe.ai/v1/systemone`.
-Check that you are allowed to send that code to a third-party service before you turn it on.
-
-To turn it on, set two environment variables:
+`TYPESAFE_API_KEY` also turns on `jev-skill-suggestion`, so setting it for that feature also sends your code. Check
+that you are allowed to send that code to a third-party service before you set the key.
 
 ```bash
-export CLEAN_CODE_JEV=1
 export TYPESAFE_API_KEY=<your own key>
+export CLEAN_CODE_JEV=0   # optional: keep the key but turn this layer off
 ```
 
 Do not put the key in this repository or in any committed file.

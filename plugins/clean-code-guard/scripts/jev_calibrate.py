@@ -134,7 +134,7 @@ def note_threshold(table: dict[str, dict]) -> float:
 
 def run(labels_file: str) -> int:
     if not jev_review.enabled():
-        print("Set CLEAN_CODE_JEV=1 and TYPESAFE_API_KEY first.", file=sys.stderr)
+        print("Set TYPESAFE_API_KEY first, and do not set CLEAN_CODE_JEV=0.", file=sys.stderr)
         return 2
     data = json.loads(Path(labels_file).read_text(encoding="utf-8"))
     cache, rows = jev_review.AnswerCache(), {name: [] for name in jev_review.QUESTIONS}

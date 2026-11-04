@@ -92,7 +92,7 @@ https://typesafe.ai:
 |---|---|
 | `jev-skill-suggestion` in Claude Code | The plugin's `typesafeApiKey` setting, which Claude Code asks for at install and stores as sensitive. |
 | `jev-skill-suggestion` in VS Code Copilot | The `TYPESAFE_API_KEY` environment variable. |
-| `clean-code-guard` Jev layer (off by default) | The `TYPESAFE_API_KEY` environment variable, plus `CLEAN_CODE_JEV=1` to turn it on. |
+| `clean-code-guard` Jev layer | The `TYPESAFE_API_KEY` environment variable turns it on. Set `CLEAN_CODE_JEV=0` to keep the key but turn it off. |
 
 Both features send text to TypeSafe: `jev-skill-suggestion` sends your prompt and skill descriptions, and the
 `clean-code-guard` Jev layer sends the source of functions you change. Check that you are allowed to send that before

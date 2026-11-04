@@ -67,8 +67,8 @@ Layer 1 enforces these for Python. Hold other languages to the same numbers.
 
 ## The Jev layer
 
-Layer 2 is off by default. Each user turns it on with their own TypeSafe API key. No key ships with the plugin. It
-runs when `CLEAN_CODE_JEV=1` and `TYPESAFE_API_KEY` are both set.
+Layer 2 is on whenever `TYPESAFE_API_KEY` is set. No key ships with the plugin, so each user brings their own.
+`CLEAN_CODE_JEV=0` turns it off while keeping the key.
 
 When it is on, it sends each new or changed function of 8 or more lines to `api.typesafe.ai`, at most 6 per edit
 and at most 12,000 characters each. It asks four questions:

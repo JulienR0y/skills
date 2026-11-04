@@ -1,6 +1,6 @@
 """Second layer of the clean-code guard: TypeSafe Jev judges design smells a syntax tree cannot see.
 
-Off unless CLEAN_CODE_JEV=1 and TYPESAFE_API_KEY are both set. When on, it sends the source of each new
+On whenever TYPESAFE_API_KEY is set; CLEAN_CODE_JEV=0 turns it off. When on, it sends the source of each new
 or changed function (at most MAX_STATE characters) to api.typesafe.ai and asks four yes/no questions.
 
 A question can block only after calibration (jev_calibrate.py) showed at least 90% precision at its
@@ -82,7 +82,7 @@ class Verdict:
 
 
 def enabled() -> bool:
-    return os.environ.get("CLEAN_CODE_JEV") == "1" and bool(os.environ.get("TYPESAFE_API_KEY"))
+    return os.environ.get("CLEAN_CODE_JEV") != "0" and bool(os.environ.get("TYPESAFE_API_KEY"))
 
 
 def gates() -> dict[str, dict]:

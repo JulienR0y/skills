@@ -302,7 +302,7 @@ class Review:
         return "\n".join(text[f.node.lineno - 1:f.node.end_lineno])
 
     def review_with_jev(self) -> None:
-        """Layer 2: design questions for new or changed functions (off unless CLEAN_CODE_JEV=1)."""
+        """Layer 2: design questions for new or changed functions (on when TYPESAFE_API_KEY is set, off with CLEAN_CODE_JEV=0)."""
         for v in jev_review.assess(self.jev_candidates):
             q = jev_review.QUESTIONS[v.question]
             self.add(v.line, f"jev_{v.question}", q.tag, f"Jev rates `{v.qualname}` {v.probability:.2f} on: {q.statement}",

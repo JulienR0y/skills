@@ -20,7 +20,7 @@ HOME = Path(os.environ.get("COPILOT_HOME", Path.home() / ".copilot"))
 def main() -> int:
     target = HOME / "hooks" / "clean-code-guard"
     target.mkdir(parents=True, exist_ok=True)
-    for name in ("code_smells.py", "smell_rules.py", "jev_review.py"):
+    for name in ("code_smells.py", "smell_rules.py", "jev_review.py", "jev_calibration.json"):
         shutil.copy2(HERE / name, target / name)
     (target / "code_smells_copilot.py").unlink(missing_ok=True)  # the adapter older versions installed
     config = {"version": 1, "hooks": {"postToolUse": [{

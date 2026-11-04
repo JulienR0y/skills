@@ -105,12 +105,23 @@ def test_jev_ratchet() -> None:
     assert {(v.question, v.blocks) for v in found} == {("srp", True), ("naming", False)}
     changed = jev_review.Candidate("f", 3, "NEW", "OLD")
     assert jev_review.judge(changed, FakeJevCache({"NEW": {"srp": 0.95}, "OLD": {"srp": 0.97}}), limits) == []
-    saved = os.environ.pop("CLEAN_CODE_JEV", None)
+
+
+
+def test_jev_on_by_default_with_key_and_opt_out() -> None:
+    saved = {name: os.environ.pop(name, None) for name in ("CLEAN_CODE_JEV", "TYPESAFE_API_KEY")}
     try:
-        assert jev_review.assess([jev_review.Candidate("f", 1, "x = 1\n" * 9, None)]) == []  # off by default
+        assert not jev_review.enabled()  # no key: nothing to send with
+        os.environ["TYPESAFE_API_KEY"] = "synthetic-test-key"
+        assert jev_review.enabled()  # a key alone turns it on
+        os.environ["CLEAN_CODE_JEV"] = "0"
+        assert not jev_review.enabled()
+        assert jev_review.assess([jev_review.Candidate("f", 1, "x = 1\n" * 9, None)]) == []
     finally:
-        if saved is not None:
-            os.environ["CLEAN_CODE_JEV"] = saved
+        for name, value in saved.items():
+            os.environ.pop(name, None)
+            if value is not None:
+                os.environ[name] = value
 
 
 def test_hook_payload_per_agent() -> None:
@@ -140,7 +151,8 @@ def test_checks_code_outside_any_repository() -> None:
 def run_all() -> int:
     for test in (test_new_function_smells, test_moves_and_small_growth_stay_quiet, test_dispatch_smells,
                  test_duplication, test_test_file_and_container_smells, test_jev_ratchet,
-                 test_hook_payload_per_agent, test_checks_code_outside_any_repository):
+                 test_jev_on_by_default_with_key_and_opt_out, test_hook_payload_per_agent,
+                 test_checks_code_outside_any_repository):
         test()
     print("code_smells self-test: ok")
     return 0
