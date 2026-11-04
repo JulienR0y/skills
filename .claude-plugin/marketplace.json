@@ -1,0 +1,25 @@
+{
+  "name": "julienr0y",
+  "owner": { "name": "Julien Roy" },
+  "description": "Julien Roy's skills and hooks for coding agents.",
+  "plugins": [
+    {
+      "name": "julien-skills",
+      "source": "./plugins/julien-skills",
+      "description": "Skills for peer sessions, code review, commits, merge conflicts, planning, Teams and VS Code.",
+      "category": "engineering"
+    },
+    {
+      "name": "clean-code-guard",
+      "source": "./plugins/clean-code-guard",
+      "description": "Flags Clean Code, SOLID and DRY smells that an agent's edit introduces.",
+      "category": "engineering"
+    },
+    {
+      "name": "jev-skill-suggestion",
+      "source": "./plugins/jev-skill-suggestion",
+      "description": "Lets TypeSafe's Jev pick at most one skill per prompt and keeps the skill list out of context. Claude Code only.",
+      "category": "productivity"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "description": "Check each Python file an agent writes or edits for smells the change introduced.",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit|apply_patch|edit|create|write|str_replace_editor",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/code_smells.py\" --hook",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}

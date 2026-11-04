@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+# Calibration label sets hold the calibrated codebase's own source; keep them local.
+*labels*.json
+# peer-session fleet state, written by the peer-session scripts and their tests
+fleet/
+node_modules/

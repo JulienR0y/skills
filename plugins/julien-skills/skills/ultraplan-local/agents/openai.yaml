@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ultraplan Local"
+  short_description: "Deep planning with parallel codebase analysis"
+  default_prompt: "Use $ultraplan-local to create a critique-reviewed implementation plan from this Jira ticket or feature request."

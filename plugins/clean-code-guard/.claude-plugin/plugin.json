@@ -1,0 +1,7 @@
+{
+  "name": "clean-code-guard",
+  "version": "0.2.0",
+  "description": "Flags Clean Code, SOLID and DRY smells that an agent's edit introduces, in Claude Code and VS Code Copilot.",
+  "author": { "name": "Julien Roy" },
+  "keywords": ["clean-code", "solid", "dry", "code-smells", "hooks"]
+}

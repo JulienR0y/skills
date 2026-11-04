@@ -1,0 +1,25 @@
+{
+  "skill_name": "codex-peer-sessions",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Start two Codex workers in cmux panes for this repository: one to inspect the API tests and one to inspect the CLI tests. Give each worker a narrow scope, keep the panes visible, and tell me how to send a follow-up prompt.",
+      "expected_output": "Uses codex-peer-sessions, chooses pane placement, launches named workers with safe Codex flags, records fleet metadata, and explains pane relay limitations."
+    },
+    {
+      "id": 2,
+      "prompt": "Create a persistent Codex thread in /home/me/dev, ask it for a read-only migration risk report, and return the thread ID plus the final answer as JSON.",
+      "expected_output": "Uses codex-thread.py, starts or resumes a named non-ephemeral thread with read-only sandboxing, waits for turn/completed, and returns the thread ID and machine-readable reply."
+    },
+    {
+      "id": 3,
+      "prompt": "The Codex peer fleet looks frozen. Check the worker panes, distinguish an approval prompt from a completed worker, and stop only the fleet workers without killing my other Codex sessions.",
+      "expected_output": "Reads the fleet metadata and panes, reports uncertainty when screen output is incomplete, kills only exact recorded worker PIDs, closes matching cmux surfaces, and avoids pkill codex."
+    },
+    {
+      "id": 4,
+      "prompt": "Start three visible Codex workers in Herdr for this repository without adding panes to my coordinator workspace. Name them by responsibility so I can distinguish them in the workspace and agent lists.",
+      "expected_output": "Creates one named fleet workspace, places all three workers inside it with descriptive pane and agent labels, preserves the coordinator workspace, records stable pane IDs, and prints one fleet-workspace cleanup command."
+    }
+  ]
+}
