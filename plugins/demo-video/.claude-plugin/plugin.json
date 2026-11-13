@@ -1,0 +1,7 @@
+{
+  "name": "demo-video",
+  "version": "0.1.0",
+  "description": "Film product-style demo videos of real software with an agent at the controls: storyboard, screen recording, an operator agent, and an edit with zooms, callouts, captions, time-lapses and blurs.",
+  "author": { "name": "Julien Roy" },
+  "keywords": ["demo", "video", "screencast", "screen-recording", "computer-use", "ffmpeg"]
+}

@@ -10,6 +10,7 @@ skills in any agent that reads `SKILL.md` files.
 | `julien-skills` | Nine skills: see the table below. |
 | `clean-code-guard` | A hook that checks each Python file the agent edits for Clean Code, SOLID and DRY problems the edit added, plus a skill with the rules. See [its README](plugins/clean-code-guard/README.md). |
 | `jev-skill-suggestion` | TypeSafe's Jev picks at most one skill per prompt and the skill list stays out of the context window. Claude Code and VS Code Copilot only. See [its README](plugins/jev-skill-suggestion/README.md). |
+| `demo-video` | Films a product-style demo of real software with an agent at the controls: storyboard, screen recording, an operator agent, and an edit with zooms, callouts, captions and time-lapses. Needs Python and uv; recording is tested on Windows. See [its README](plugins/demo-video/README.md). |
 
 Skills in `julien-skills`:
 
@@ -35,6 +36,7 @@ Use one method per agent. Installing the same skills twice in one agent gives yo
 /plugin install julien-skills --marketplace JulienR0y/skills
 /plugin install clean-code-guard --marketplace JulienR0y/skills
 /plugin install jev-skill-suggestion --marketplace JulienR0y/skills
+/plugin install demo-video --marketplace JulienR0y/skills
 ```
 
 Install only the plugins you want. This one-step form needs Claude Code 2.1.275 or later. On an older version, run

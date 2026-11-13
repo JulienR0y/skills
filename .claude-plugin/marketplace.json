@@ -20,6 +20,12 @@
       "source": "./plugins/jev-skill-suggestion",
       "description": "Lets TypeSafe's Jev pick at most one skill per prompt and keeps the skill list out of context. Claude Code only.",
       "category": "productivity"
+    },
+    {
+      "name": "demo-video",
+      "source": "./plugins/demo-video",
+      "description": "Film product-style demo videos of real software with an agent at the controls, then edit them with zooms, callouts and captions.",
+      "category": "productivity"
     }
   ]
 }
