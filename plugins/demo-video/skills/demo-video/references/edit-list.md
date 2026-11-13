@@ -27,11 +27,11 @@ An edit list is a JSON file: a few settings and a list of shots, played in order
 | `dur` | Seconds on screen. Default `out - in`. Shorter than the range plays it faster (a time-lapse). |
 | `source`, `cursor` | Per-shot take and cursor log, overriding the top level. |
 | `view` | The part of the take this shot may show, `[x0, y0, x1, y1]`. Default: the whole frame. Use it to crop away something that changes between shots, such as a browser bar that appears while an agent acts. |
-| `zoom` | One rect (a fixed crop) or two (a move from the first to the second). Each is grown to the output's aspect and kept inside `view`. |
+| `zoom` | One rect `[x0, y0, x1, y1]` (a fixed crop), or a list of two `[[...], [...]]` (a move from the first to the second). Each is grown to the output's aspect and kept inside `view`. |
 | `ease` | `[start, end]` fractions of the shot over which the zoom moves. Default `[0, 1]`; `[0, 0.6]` arrives early and holds. |
 | `fade` | Cross-fade in from the previous shot's last frame, in seconds. |
 | `caption` | Chapter text in the accent pill, top left. `caption_bottom: true` puts it bottom left (when the top holds the action). |
-| `callouts` | Cards: `{"text": title, "sub": subtitle, "box": [x, y] output px, "t": [from, to] seconds into the shot, "to": [x, y] take px}`. `to` draws a line and dot to that point. |
+| `callouts` | Cards: `{"text": title, "sub": subtitle, "box": [x, y], "t": [from, to], "to": [x, y]}`. `box` is the card's top-left corner in output pixels; `t` is seconds into the shot; `to` (take pixels) draws a line and dot to that point. |
 | `spot` | Take rect to highlight: the rest dims and the rect gets a ring. `spot_t: [from, to]` limits it in time. |
 | `counter` | Elapsed-time card: `{min}`, `{sec}` or `{clock}` (m:ss) since `counter_zero` (unix seconds, for example a mark's time). Uses the take's `.start.txt` for wall time, so it stays right across segments and speed-ups. `counter_box: [x, y]` moves it. |
 | `title` | `[title, subtitle]` on a dark veil over the frame. The pointer is not drawn on title shots. |

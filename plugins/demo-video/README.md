@@ -11,7 +11,9 @@ Ask for it in plain words, for example "make a 60-second demo video of the expor
 
 - Python 3.10 or later and [uv](https://docs.astral.sh/uv/). On first use, uv fetches Pillow, NumPy and an ffmpeg
   binary through imageio-ffmpeg; nothing is installed globally.
-- An agent that can act on the screen: computer use for desktop apps, or a browser tool for web apps.
+- An agent that can act on the screen. In Claude Code: computer use for desktop apps, Claude in Chrome or
+  Playwright MCP for web apps. In GitHub Copilot: Playwright MCP for web apps (see below); desktop apps need a
+  desktop-automation MCP server, which is untested.
 - Windows for recording, which is tested. macOS (avfoundation) and Linux (x11grab) recording is written but untested;
   install `pynput` there for the cursor log. Editing works everywhere.
 
@@ -39,6 +41,40 @@ In Claude Code:
 ```
 
 For other agents, see the [repository README](../../README.md).
+
+## Use it in GitHub Copilot
+
+Install the plugin:
+
+- Copilot CLI: `copilot plugin marketplace add JulienR0y/skills`, then `copilot plugin install demo-video@julienr0y`.
+- VS Code: run **Chat: Install Plugin From Source** and enter `https://github.com/JulienR0y/skills`.
+
+Copilot has no built-in screen control, so add Playwright MCP for web-app demos.
+
+Copilot CLI, in `~/.copilot/mcp-config.json`:
+
+```json
+{
+  "mcpServers": {
+    "playwright": { "type": "local", "command": "npx", "args": ["-y", "@playwright/mcp@0.0.84"], "tools": ["*"] }
+  }
+}
+```
+
+VS Code, in `.vscode/mcp.json` or your user MCP configuration:
+
+```json
+{
+  "servers": {
+    "playwright": { "command": "npx", "args": ["-y", "@playwright/mcp@0.0.84"] }
+  }
+}
+```
+
+Then ask in agent mode, for example "Make a 30-second demo video of the checkout flow at http://localhost:3000".
+
+Tested with Copilot CLI 1.0.105 and Playwright MCP 0.0.84 on Windows: Copilot picked the skill from a plain request
+and delivered a 29-second web-app demo. The VS Code setup above uses the same server but has not been run yet.
 
 ## Check it
 

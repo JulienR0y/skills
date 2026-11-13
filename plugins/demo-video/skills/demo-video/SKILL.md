@@ -10,6 +10,9 @@ small film crew would. You are the **director**: you plan, set the stage, run th
 **operator** performs the clicks from a written brief while the recorder runs. Afterwards a renderer turns the raw
 take and an edit list (JSON) into the finished video.
 
+It works in any agent that can run shell commands and act on the screen: Claude Code, GitHub Copilot (VS Code or
+CLI) and others. "Roles" below says which screen-control tool to use where.
+
 The scripts are in `scripts/` in this skill's folder. They need Python 3.10+ and [uv](https://docs.astral.sh/uv/);
 uv fetches Pillow, NumPy and an ffmpeg binary (imageio-ffmpeg) on first use. Run them as
 
@@ -45,16 +48,23 @@ uv run --no-project --with pillow --with numpy --with imageio-ffmpeg python <ski
 
 - **Director (you)** keeps the plan and the edit in context. You never babysit the run click by click: that burns
   your context and the user's screen time.
-- **Operator**: a subagent on a smaller, faster model (for example Sonnet or Haiku) that follows the brief in
-  `references/operator-brief.md`: it performs each beat with camera pacing, stamps a mark before it, reads every
-  confirmation before clicking, and returns a report. If you cannot start subagents, play the operator yourself with
-  the same brief.
-- **How the operator acts**: desktop apps through computer use; web apps through a browser tool (Claude in Chrome or
-  a built-in browser). IDEs and terminals usually allow clicks but not typing under computer use. Send text to them
-  through the app's own CLI, automation API or a test-driver extension, and film the result.
-- **Coordinates**: computer-use screenshots come in a scaled frame that the tool reports (for example 1456x819 for a
-  2560x1440 screen). Click in that frame; but every rect and point in the edit list is in take pixels, read off a
-  still from `frames.py`.
+- **Operator**: a subagent on a smaller, faster model that follows the brief in `references/operator-brief.md`: it
+  performs each beat with camera pacing, stamps a mark before it, reads every confirmation before clicking, and
+  returns a report. If your agent cannot start subagents, play the operator yourself with the same brief.
+- **How the operator acts.** Use the screen-control tool your agent has:
+
+  | Target | Claude Code | GitHub Copilot (VS Code, CLI) | Other agents |
+  |---|---|---|---|
+  | Web app | Claude in Chrome, or Playwright MCP | Playwright MCP | Playwright MCP |
+  | Desktop app | computer use | a desktop-automation MCP server (untested) | a desktop-automation MCP server |
+
+  Playwright MCP opens its own browser window and drives the page without moving the real mouse; record that window.
+  Computer use moves the real mouse and keyboard. IDEs and terminals usually allow clicks but not typing under
+  computer use: send text to them through the app's own CLI, automation API or a test-driver extension, and film
+  the result.
+- **Coordinates**: screen-control tools often return screenshots in a scaled frame (computer use reports it, for
+  example 1456x819 for a 2560x1440 screen). Act in the tool's own frame; but every rect and point in the edit list is
+  in take pixels, read off a still from `frames.py`.
 
 ## Workflow
 
@@ -78,7 +88,8 @@ on screen. Then agree with the user (when the request already fixes these, follo
 - Everything that is not part of the story is done before the recorder starts: modes, units, sample data, opened
   files. A rehearsal finds these.
 - Nothing else overlaps the target, including your own agent app. Move that to another screen or minimise it:
-  anything over the target ends up in the take. Computer use may hide other apps while it acts; tell the user so.
+  anything over the target ends up in the take. Some tools hide other apps while they act (Claude's computer use
+  does); tell the user so.
 - Do Not Disturb or Focus on, notifications off. Screen lock and screen saver off for the length of the take: a locked
   screen cannot be captured (the recorder then continues in a new segment once it unlocks).
 - Sign-ins, first-run prompts and permissions are done beforehand, off camera.
@@ -86,24 +97,27 @@ on screen. Then agree with the user (when the request already fixes these, follo
 - Do a rehearsal without recording when the flow has dialogs you have not seen. It is cheap and finds the slow or
   surprising steps.
 - Tell the user before you take the screen, and ask them to keep their hands off the mouse and keyboard until you
-  say the take is done: computer use stops each action ("user interrupt") when someone else moves the mouse or
-  types. If that happens while the user is at the machine, ask them before going on; do not retry into their work.
-  When it happens with nobody at the machine, use single actions instead of batches, and pace with a shell sleep.
+  say the take is done. Tools that move the real mouse stop when someone else moves it (computer use reports "user
+  interrupt"); browser automation does not use the mouse, but any window the user brings in front is filmed. After
+  an interrupt while the user is at the machine, ask them before going on; do not retry into their work. When it
+  happens with nobody at the machine, use single actions instead of batches, and pace with a shell sleep.
 
 ### 3. Record
 
 1. Start the recorder in the background:
    `record.py --out <project>/takes/t1.mp4 --window "<title text>" --pad 40`. Wait for its line
    `recording WxH at X,Y to ...` (the first run of uv spends a few seconds installing packages) and check the window
-   and size it names. When several windows match, it takes the frontmost and says so. `--pad` keeps menus and
+   and size it names. If your shell tool shows no output yet, `t1.mp4.start.txt` appears the moment capture starts. When several windows match, it takes the frontmost and says so. `--pad` keeps menus and
    flyouts that open past the window's edges in frame; drop it for a maximised window.
    The recorder films a screen area, so anything in front of the window is filmed too. It prints
    `COVERED by '<title>'` with the take time when another window comes in front, and `target clear again` when it
    is gone. Read its output between beats; the operator brings the target back to the front, and you cut or
    re-shoot that stretch.
 2. Start the operator with the brief (`references/operator-brief.md`). It runs `mark.py <beat>` from the project
-   folder before each beat, so the beats land in `marks.csv`. When you play the operator yourself, mark only the
-   chapter starts: `mark.py --clicks takes/t1.mp4` later lists every click in the take, which finds the rest.
+   folder right before each beat's first action, so the beats land in `marks.csv`. Marks are approximate: with slow
+   tool calls they land seconds before the action shows, so confirm each shot's times on a 1-second contact sheet
+   around its mark. When you play the operator yourself, mark only the chapter starts: `mark.py --clicks
+   takes/t1.mp4` later lists every real-mouse click in the take, which finds the rest.
 3. Wait for the operator's report, then create `t1.mp4.stop`. For a long run, let the recorder run and check
    progress through the product's own status or logs at a slow interval, not by watching the screen.
 
@@ -116,6 +130,8 @@ Take 2-3 takes of the key moments if they are short; the best one usually needs 
 - `frames.py takes/t1.mp4 --sheet sheet.png --every 5` (and narrower windows around each mark) shows what happened
   when. Look at the sheets: they are how you see the footage.
 - If an agent app drew a glow at the edges, build a glow model now (`references/pitfalls.md`, "Coloured glow").
+- Browser automation that does not move the real mouse (Playwright) leaves the cursor log still: set `no_cursor` and
+  point with spotlights and callouts instead.
 - Note anything that must not be shown: a personal name, a client file, a notification. It gets blurred in the edit.
 
 ### 5. Edit
@@ -140,7 +156,7 @@ Render the whole video, then make a contact sheet of it every second (`frames.py
 - Does each shot show what its caption and callout say, at that moment? Nothing stuck, frozen or half-loaded on
   screen while the caption has moved on, no dialog left open behind the action, no hover tooltip over the subject.
 - No secret, personal or client data anywhere, including in small text, tabs and file lists.
-- Callouts and captions do not cover the thing they point at. The pointer moves where the clicks happen.
+- Callouts and captions do not cover the thing they point at. A drawn pointer moves where the clicks happen.
 - No glow, debugging bar or other agent overlay left in.
 
 Fix and re-render until a full pass finds nothing. This step is what separates a demo from a screen recording.

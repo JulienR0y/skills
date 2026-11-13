@@ -29,6 +29,19 @@ Browser automation can show a bar such as "<extension> started debugging this br
 the page down by its height. Compare a still with the bar and one without, and give each shot a `view` that starts
 at the page's top for that state, so content stays put from shot to shot. Crop the bar itself out of every shot.
 
+## Playwright's browser window
+
+Playwright MCP opens its own browser window. Record it with `--window "<page title>"` once the page is loaded (the
+recorded area stays fixed when the title changes later). Playwright clicks through the page, not the real mouse,
+so the cursor log stays still: set `no_cursor`.
+
+- Its resize sets the page's viewport, not the window, so the take can hold the browser's tabs, address bar, an
+  "automated test software" bar and an empty area below the page. Take a still of the take (`frames.py`), read the
+  page's rect off it, and give every shot that rect as its `view`.
+- Navigating can leave an extra `about:blank` tab in front. List the tabs, close the blank one, then resize.
+- Element refs change after a reload or navigation: take a new page snapshot before the next action.
+- Run actions one after another, never in parallel: two typing calls at once interleave their text.
+
 ## The browser agent draws its own pointer
 
 Browser extensions draw their own pointer in the page, while the system pointer (the one `record.py` logs) does not

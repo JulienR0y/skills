@@ -15,8 +15,9 @@ Everything you do is filmed. Nothing is staged: it is a real run in <system / ac
 
 - <App and window: title, maximised on the primary screen, what is open in it>.
 - <Windows behind it that you must never touch>.
-- <How you act: computer use for "<app>" (clicks only / clicks and typing), or the browser tool for the tab
-  "<title>">. If access is missing, request it once for "<app>".
+- <How you act: the screen-control tool and its target, for example computer use for "<app>" (clicks only, or
+  clicks and typing), or Playwright MCP on the page <url> in the window it opened>. If access is missing, request it
+  once.
 - <How text is entered, when the app cannot be typed into: the exact command, and which shell to run it from>.
 
 ## Marks
@@ -32,14 +33,15 @@ One bare command per call; it needs only plain Python. The labels let the direct
 ## Pacing (it is a film)
 
 - Before each beat, check on a screenshot that <the target window> is in front. If another window covers any of
-  it, bring the target back to the front (open_application for "<app>", or a click on its title bar), note the time,
-  and redo the beat once it is clear.
+  it, bring the target back to the front (with your tool's open or focus action, or a click on its title bar), note
+  the time, and redo the beat once it is clear.
 - Before each click, the target has been visible on screen for at least 2 seconds (wait 2 s).
 - After each click, wait 2 s so the result stays on camera.
 - After clicking, move the pointer to a neutral spot (<an empty area, about (x, y)>) so no hover tooltip sits over the
   next target.
-- Batch predictable sequences (wait, click, wait, screenshot). Low-resolution screenshots are fine for checking
-  progress; zoom in to read text.
+- Batch predictable sequences (wait, click, wait, screenshot) where your tool offers a batch, but run actions one
+  after another, never as parallel calls: two typing calls at once interleave their text. Low-resolution
+  screenshots are fine for checking progress; zoom in to read text.
 - During a long wait, check every <30-60> seconds, not more often.
 
 ## Beats

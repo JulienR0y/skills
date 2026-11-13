@@ -248,6 +248,11 @@ def blur(frame, rects):
 
 
 # ---------------------------------------------------------------- one shot
+def as_rects(zoom):
+    """A zoom as a list of rects: one rect [x0, y0, x1, y1] (a fixed crop) or a list of one or two (a move)."""
+    return [zoom] if isinstance(zoom[0], (int, float)) else zoom
+
+
 class ShotRenderer:
     """Turns source frames of one shot into output frames."""
 
@@ -257,7 +262,7 @@ class ShotRenderer:
         self.take_start = start_time(take)
         self.dur = shot_duration(shot)
         self.view = shot.get("view") or [0, 0, self.src_w, self.src_h]
-        self.zooms = [self.fit_aspect(z) for z in shot.get("zoom", [self.view])]
+        self.zooms = [self.fit_aspect(z) for z in as_rects(shot.get("zoom", self.view))]
 
     def fit_aspect(self, rect):
         """Grows a crop rect to the output's aspect, kept inside the shot's view."""
@@ -341,7 +346,7 @@ class ShotRenderer:
             self.draw_cursor(layer, crop, s)
         self.draw_texts(layer, crop, local, s)
         if self.shot.get("title"):
-            layer = draw_title(layer, self.style, self.shot["title"], fade_alpha(local, 0.0, self.dur + 1, 0.4))
+            layer = draw_title(layer, self.style, self.shot["title"], 1.0)  # in and out come from the shots' fades
         return Image.alpha_composite(img, layer).convert("RGB")
 
 

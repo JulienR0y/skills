@@ -33,6 +33,7 @@ def edit_list(take):
         "source": str(take), "out": [480, 288], "cursor_lag_s": 0.1,
         "shots": [
             {"in": 0.5, "out": 0.5, "dur": 1.0, "title": ["Title", "Subtitle"]},
+            {"in": 0.5, "out": 0.9, "dur": 0.3, "zoom": [100, 50, 420, 242]},
             {"in": 0.5, "out": 2.0, "fade": 0.2, "caption": "1  Zoom in", "zoom": [[0, 0, 640, 384], [200, 100, 520, 292]],
              "spot": [300, 200, 500, 300], "callouts": [{"text": "A callout", "sub": "with a pointer", "box": [20, 180],
                                                          "to": [400, 250], "t": [0.1, 1.4]}]},
@@ -49,9 +50,9 @@ def test_render_writes_every_frame(tmp_path):
     edl_path.write_text(json.dumps(edit_list(take)))
     out = tmp_path / "out.mp4"
     frames = render_video(load_edl(edl_path), out)
-    assert frames == 30 + 45 + 15
+    assert frames == 30 + 9 + 45 + 15
     assert probe_size(out) == (480, 288)
-    assert abs(duration(out) - 3.0) < 0.1
+    assert abs(duration(out) - 3.3) < 0.1
 
 
 def test_cursor_glides_into_a_far_move_and_lands_on_time():
