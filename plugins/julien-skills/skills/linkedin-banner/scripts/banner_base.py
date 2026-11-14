@@ -10,7 +10,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 W, H, S = 1584, 396, 3                    # final size and supersampling factor
 PHOTO_ZONE = (0, 200, 350, H)             # the profile photo covers roughly this area
-MIN_READABLE = 20                         # px in the source; LinkedIn shows the banner at about half size
+# LinkedIn serves a half-size JPEG copy: keep text at 26 px or more and strokes at 2 px or more (design space).
 SEED = 1                                  # change for a different random layout
 
 

@@ -1,6 +1,6 @@
 ---
 name: linkedin-banner
-description: Use when someone wants a LinkedIn banner (cover or background image) designed for them. Interviews the person about their industry, path and accomplishments, finds one visual idea that is theirs, renders it as a 1584 x 396 PNG with a script, checks it at LinkedIn's real display size, iterates on their feedback, and uploads it only after they approve a specific image.
+description: Use when someone wants a LinkedIn banner (cover or background image) designed for them. Interviews the person about their industry, path and accomplishments, finds one visual idea that is theirs, renders it as a 1584 x 396 PNG with a script, checks it as the small JPEG copy LinkedIn actually serves, iterates on their feedback, and uploads it only after they approve a specific image.
 ---
 
 # LinkedIn banner
@@ -54,8 +54,12 @@ Checks before showing any image:
 
 - Exactly 1584 x 396.
 - Nothing important in the photo zone: x under 350 and y over 200.
-- **Nothing meant to be read is under 20 px tall in the source.** LinkedIn shows the banner at about 792 px wide on
-  desktop, so smaller text becomes texture.
+- **Design for the copy LinkedIn serves, not the file you upload.** On a standard desktop screen LinkedIn sends an
+  842 x 209 JPEG of about 50 KB, whatever size was uploaded, so everything is halved and then compressed. In the
+  1584 x 396 source: no text under 26 px, no stroke under 2 px, and thin coloured lines on a dark background need
+  to be brighter than looks right at full size, because JPEG blurs colour more than brightness. A larger upload
+  does not help. This rule was learned the hard way: a first banner with 1 px lines and 16 px labels looked sharp
+  as a file and soft on the profile.
 - At most two typefaces, each with a job. Generic sans-serif type reads as a template; choose type deliberately and
   say why.
 - Every word passes the stranger test: would someone who has never met them understand it in two seconds? Personal
@@ -74,8 +78,10 @@ Known traps:
 ## Step 4: preview on a profile
 
 Run `scripts/profile_preview.py <banner.png> [more.png ...]`. It places each banner on a mock profile card in
-LinkedIn's light and dark modes at desktop size, with a disc where the photo goes. Judge and compare variants there,
-not at full size. Tell the person the mock is approximate and does not cover the mobile app.
+LinkedIn's light and dark modes at desktop size, with a disc where the photo goes. It first reduces the banner to
+the small JPEG copy LinkedIn serves, so fuzzy lines and unreadable labels show up here instead of on the live
+profile. Look at this preview yourself before showing anything, and judge and compare variants there, not at full
+size. Tell the person the mock is approximate and does not cover the mobile app.
 
 ## Step 5: iterate
 
@@ -94,5 +100,6 @@ not at full size. Tell the person the mock is approximate and does not cover the
    file themselves, or, before clicking, patch `HTMLInputElement.prototype.click` in the page so a file input is
    attached to the document instead of opening the picker, then give the file to that input.
 4. Check the crop screen shows the whole image, then Save changes.
-5. Reload the profile and confirm the new banner is showing. Say what you checked and what you did not (mobile).
+5. Reload the profile, confirm the new banner is showing, and zoom in on it to check it is as sharp as the preview.
+   Say what you checked and what you did not (mobile).
 6. Tell them which image and script are final and which drafts can be deleted. Delete nothing yourself.
