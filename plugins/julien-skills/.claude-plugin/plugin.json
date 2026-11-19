@@ -1,10 +1,10 @@
 {
   "name": "julien-skills",
-  "version": "0.5.0",
-  "description": "Skills for peer sessions, code review, commits, merge conflicts, planning, Teams, VS Code and LinkedIn banners.",
+  "version": "0.6.0",
+  "description": "Skills for peer sessions, code review, tests, commits, merge conflicts, planning, Teams, VS Code and LinkedIn banners.",
   "author": { "name": "Julien Roy" },
   "repository": "https://github.com/JulienR0y/skills",
-  "keywords": ["skills", "code-review", "git", "peer-sessions", "planning"],
+  "keywords": ["skills", "code-review", "testing", "git", "peer-sessions", "planning"],
   "skills": [
     "./skills/adversarial-review",
     "./skills/atomic-commits",
@@ -13,6 +13,7 @@
     "./skills/peer-sessions",
     "./skills/resolving-merge-conflicts",
     "./skills/teams-reader",
+    "./skills/test-maker",
     "./skills/ultraplan-local",
     "./skills/vscode-extension-test",
     "./skills/vscode-unblock"

@@ -6,7 +6,7 @@
     {
       "name": "julien-skills",
       "source": "./plugins/julien-skills",
-      "description": "Skills for peer sessions, code review, commits, merge conflicts, planning, Teams, VS Code and LinkedIn banners.",
+      "description": "Skills for peer sessions, code review, tests, commits, merge conflicts, planning, Teams, VS Code and LinkedIn banners.",
       "category": "engineering"
     },
     {

@@ -1,0 +1,15 @@
+[
+  {"name": "default: k changed", "file": "search_settings.py", "old": "    k: int = 20\n", "new": "    k: int = 10\n"},
+  {"name": "default: injection filter on", "file": "search_settings.py", "old": "injection_filter: bool = False", "new": "injection_filter: bool = True"},
+  {"name": "validation removed", "file": "search_settings.py", "old": "if self.k < 1:", "new": "if False:"},
+  {"name": "from_dict: reads k from keyword_k", "file": "search_settings.py", "old": "k=data.get(\"k\", defaults.k)", "new": "k=data.get(\"keyword_k\", defaults.k)"},
+  {"name": "from_dict: ignores rerank_n", "file": "search_settings.py", "old": "rerank_n=data.get(\"rerank_n\", defaults.rerank_n)", "new": "rerank_n=defaults.rerank_n"},
+  {"name": "to_dict: swaps k and keyword_k", "file": "search_settings.py", "edits": [
+    {"old": "\"k\": self.k,", "new": "\"k\": self.keyword_k,"},
+    {"old": "\"keyword_k\": self.keyword_k,", "new": "\"keyword_k\": self.k,"}
+  ]},
+  {"name": "prompt: tools joined differently", "file": "search_settings.py", "old": "\", \".join(tools)", "new": "\"; \".join(tools)"},
+  {"name": "prompt: documents not de-duplicated", "file": "search_settings.py", "old": "list(dict.fromkeys(documents))", "new": "list(documents)"},
+  {"name": "prompt: one/many guidance inverted", "file": "search_settings.py", "old": "if len(attached) == 1:", "new": "if len(attached) > 1:"},
+  {"name": "prompt: date format changed", "file": "search_settings.py", "old": "{today:%Y-%m-%d}", "new": "{today:%d-%m-%Y}"}
+]

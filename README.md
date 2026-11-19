@@ -7,7 +7,7 @@ skills in any agent that reads `SKILL.md` files.
 
 | Plugin | What it gives the agent |
 |---|---|
-| `julien-skills` | Ten skills: see the table below. |
+| `julien-skills` | Eleven skills: see the table below. |
 | `clean-code-guard` | A hook that checks each Python file the agent edits for Clean Code, SOLID and DRY problems the edit added, plus a skill with the rules. See [its README](plugins/clean-code-guard/README.md). |
 | `jev-skill-suggestion` | TypeSafe's Jev picks at most one skill per prompt and the skill list stays out of the context window. Claude Code and VS Code Copilot only. See [its README](plugins/jev-skill-suggestion/README.md). |
 | `demo-video` | Films a product-style demo of real software with an agent at the controls: storyboard, screen recording, an operator agent, and an edit with zooms, callouts, captions and time-lapses. Needs Python and uv; recording is tested on Windows. See [its README](plugins/demo-video/README.md). |
@@ -23,6 +23,7 @@ Skills in `julien-skills`:
 | `peer-sessions` | Run and message other Claude Code sessions on the same machine. |
 | `resolving-merge-conflicts` | Resolve a merge or rebase in progress. |
 | `teams-reader` | Read Microsoft Teams chats through the signed-in web app. Needs Node.js and Chrome. |
+| `test-maker` | Refactor a test file, or write tests test-first for a ticket, so they catch real regressions: happy path, error handling, real objects before mocks, factories, and idioms from the official docs. A bundled mutation probe scores the tests before and after. Needs Python 3.10 or later. |
 | `ultraplan-local` | Write a deep implementation plan from parallel codebase analysis. |
 | `vscode-extension-test` | Test a VS Code extension in your own VS Code: install a build, run its commands, answer its dialogs, and check what the window shows. Windows only. |
 | `vscode-unblock` | Find and press the hidden VS Code dialog that blocks an agent. Windows only. |
@@ -111,5 +112,6 @@ Some skills started in other people's repositories, all under the MIT license. E
 
 ```bash
 python3 plugins/clean-code-guard/scripts/code_smells.py --self-test
+python3 plugins/julien-skills/skills/test-maker/tests/test_mutation_probe.py
 claude plugin validate .
 ```
