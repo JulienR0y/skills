@@ -7,6 +7,8 @@ and moved or renamed code is recognised by its shape, so a refactor is judged on
   python code_smells.py --hook          PostToolUse hook for Claude Code, Codex and Copilot (hook JSON on stdin)
   python code_smells.py --diff [BASE]   changed .py files in the current repo against BASE (default HEAD);
                                         exits 1 when it finds a problem to fix
+  python code_smells.py FILE...         whole .py files at any path, in a repository or not; every smell
+                                        counts, since there is no earlier version; exits 1 on a problem
   python code_smells.py --self-test     runs test_code_smells.py
 
 A finding is either a problem to fix (the hook blocks until the agent responds) or a note (a small
@@ -381,7 +383,7 @@ def git_files(root: Path, rev: str, paths: list[str]) -> dict[str, str | None]:
     return out
 
 
-def before_edit(tool: str, given: dict, result: dict, after: str, root: Path, rel: str) -> str | None:
+def before_edit(tool: str, given: dict, result: dict, after: str, root: Path | None, rel: str) -> str | None:
     """The file as it was before this tool call, or None for a new file."""
     if result.get("originalFile") is not None:
         return result["originalFile"]
@@ -390,9 +392,16 @@ def before_edit(tool: str, given: dict, result: dict, after: str, root: Path, re
         undone = reverse(after, [(e.get("old_string", ""), e.get("new_string", ""), bool(e.get("replace_all"))) for e in edits])
         if undone is not None:
             return undone
-    if tool == "Write" and result.get("type") == "create":
-        return None
+    if tool == "Write" and result.get("type") == "create" or root is None:
+        return None  # new, or outside a repository with no earlier version to compare: judge the whole file
     return git(root, "show", f"HEAD:{rel}")
+
+
+def locate(path: Path) -> tuple[Path | None, str]:
+    """The git repository holding `path`, if any, and the name to report the file under."""
+    resolved = path.resolve()
+    root = git_root(resolved.parent)
+    return root, resolved.relative_to(root).as_posix() if root else resolved.as_posix()
 
 
 PATH_KEYS = {"file_path", "filePath", "path", "filePaths", "files"}
@@ -439,10 +448,9 @@ def hook() -> int:
     tool, given, result, paths = hook_payload(json.load(sys.stdin))
     messages, blocking = [], False
     for path in paths:
-        root = git_root(path.resolve().parent) if path.suffix == ".py" and path.is_file() else None
-        if root is None:
-            continue  # not Python, gone, or a scratch file outside a repository
-        rel = path.resolve().relative_to(root).as_posix()
+        if path.suffix != ".py" or not path.is_file():
+            continue  # not Python, or gone
+        root, rel = locate(path)
         after = path.read_text(encoding="utf-8", errors="replace")
         before = before_edit(tool if len(paths) == 1 else "", given, result, after, root, rel)
         findings = check(before, after, rel, root)
@@ -496,14 +504,26 @@ def diff(base: str) -> int:
     befores = git_files(root, base, changed + gone)
     afters = {rel: (root / rel).read_text(encoding="utf-8", errors="replace") for rel in changed if (root / rel).is_file()}
     ctx = diff_context(befores, afters, changed)
-    problems = 0
-    for rel, after in afters.items():
-        findings = check(befores.get(rel), after, rel, root, ctx)
-        problems += sum(not f.note for f in findings)
-        if findings:
-            print(render(rel, findings), end="\n\n")
+    problems = sum(report(rel, check(befores.get(rel), after, rel, root, ctx)) for rel, after in afters.items())
     print(f"{problems} problem(s) to fix in {len(afters)} changed Python file(s) against {base}.")
     return 1 if problems else 0
+
+
+def check_files(names: list[str]) -> int:
+    """Whole files at any path, in a repository or not."""
+    problems = 0
+    for name in names:
+        root, rel = locate(Path(name))
+        problems += report(rel, check(None, Path(name).read_text(encoding="utf-8", errors="replace"), rel, root))
+    print(f"{problems} problem(s) to fix in {len(names)} file(s).")
+    return 1 if problems else 0
+
+
+def report(rel: str, findings: list[Finding]) -> int:
+    """Print one file's findings; return how many are problems to fix."""
+    if findings:
+        print(render(rel, findings), end="\n\n")
+    return sum(not f.note for f in findings)
 
 
 def main(argv: list[str]) -> int:
@@ -518,6 +538,8 @@ def main(argv: list[str]) -> int:
     if argv[:1] == ["--self-test"]:
         from test_code_smells import run_all  # smell-ok: tests load only when asked for
         return run_all()
+    if argv and not argv[0].startswith("-"):
+        return check_files(argv)
     print(__doc__)
     return 2
 

@@ -1,8 +1,11 @@
 """Checks for code_smells.py. Run: python test_code_smells.py (or code_smells.py --self-test)."""
 from __future__ import annotations
 
+import json
 import os
+import subprocess
 import sys
+import tempfile
 
 import jev_review
 from pathlib import Path
@@ -10,6 +13,12 @@ from pathlib import Path
 from code_smells import check, hook_output, hook_payload, reverse
 
 BASE = "def small(a):\n    return a + 1\n"
+SCRIPT = Path(__file__).with_name("code_smells.py")
+
+
+def run_script(*args: str, stdin: str = "") -> subprocess.CompletedProcess:
+    return subprocess.run([sys.executable, str(SCRIPT), *args], input=stdin, capture_output=True, text=True,
+                          encoding="utf-8", errors="replace")
 
 
 def kinds(before: str | None, after: str, rel: str = "pkg/mod.py") -> set[str]:
@@ -115,10 +124,23 @@ def test_hook_payload_per_agent() -> None:
     assert hook_output("m", True)["decision"] == "block" and hook_output("m", False)["additionalContext"] == "m"
 
 
+def test_checks_code_outside_any_repository() -> None:
+    with tempfile.TemporaryDirectory() as tmp:  # the system temp folder is not inside a git repository
+        smelly, clean = Path(tmp) / "scratch.py", Path(tmp) / "clean.py"
+        smelly.write_text(BASE + "\n\n" + big_function(), encoding="utf-8", newline="\n")
+        clean.write_text(BASE, encoding="utf-8", newline="\n")
+        payload = {"tool_name": "Write", "cwd": tmp, "tool_input": {"file_path": str(smelly)},
+                   "tool_response": {"type": "create"}}
+        hooked = run_script("--hook", stdin=json.dumps(payload))
+        assert hooked.stdout and json.loads(hooked.stdout)["decision"] == "block", hooked.stderr
+        assert run_script(str(smelly)).returncode == 1
+        assert run_script(str(clean)).returncode == 0
+
+
 def run_all() -> int:
     for test in (test_new_function_smells, test_moves_and_small_growth_stay_quiet, test_dispatch_smells,
                  test_duplication, test_test_file_and_container_smells, test_jev_ratchet,
-                 test_hook_payload_per_agent):
+                 test_hook_payload_per_agent, test_checks_code_outside_any_repository):
         test()
     print("code_smells self-test: ok")
     return 0

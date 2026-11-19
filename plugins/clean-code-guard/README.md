@@ -41,13 +41,18 @@ it. A note does not block. A small addition to a class or file that is already t
 
 Moved and renamed code is recognised and not reported again.
 
+It checks every Python file an agent writes, inside a git repository or not. It compares with the version the agent
+sent (Claude Code's `originalFile`, or the edit undone) and, inside a repository, falls back to `HEAD`. A file outside
+a repository with no earlier version is judged whole. The repository-wide search for re-implemented helpers runs only
+inside a repository.
+
 ## Files
 
 | File | What it does |
 |---|---|
 | `hooks/hooks.json` | Runs the checker after each file edit in Claude Code, Codex and the Copilot CLI. |
 | `skills/clean-code-guard/SKILL.md` | Tells the agent the rules, the limits and how to answer a finding. |
-| `scripts/code_smells.py` | The checker: hook mode, `--diff` mode and `--self-test`. |
+| `scripts/code_smells.py` | The checker: hook mode, `--diff` mode, file mode and `--self-test`. |
 | `scripts/smell_rules.py` | The measurements behind layer 1. |
 | `scripts/jev_review.py` | Layer 2, the Jev questions. Off by default. |
 | `scripts/jev_calibrate.py` | Measures how precise each Jev question is, to decide which ones may block. |
@@ -85,11 +90,16 @@ Code afterwards and run it again after each update.
 
 ```bash
 python3 <plugin>/scripts/code_smells.py --diff origin/main
+python3 <plugin>/scripts/code_smells.py path/to/script.py other.py
 python3 <plugin>/scripts/code_smells.py --self-test
 ```
 
-`--diff` checks the Python files that changed against a branch or commit. Run it from the root of the repository you are checking. `<plugin>` is this plugin's folder. It exits
-with code 1 when it finds a problem, so it can run in CI or before a commit.
+`--diff` checks the Python files that changed against a branch or commit. Run it from the root of the repository you are checking. `<plugin>` is this plugin's folder.
+
+Given file paths, it checks those whole files wherever they are, in a repository or not. Every smell in them counts,
+since there is no earlier version to compare with.
+
+Both exit with code 1 when they find a problem, so they can run in CI or before a commit.
 
 ## Keep a finding on purpose
 
