@@ -17,7 +17,7 @@ Skills in `julien-skills`:
 | Skill | Use it to |
 |---|---|
 | `adversarial-review` | Review a change through three lenses (silent failures, test gaps, what input breaks it), verify each finding against the code, and sort them into will fix, skipped and dismissed. |
-| `atomic-commits` | Split a working tree into small commits with clear messages. |
+| `atomic-commits` | Commit one logical change at a time while you work, each green on its own, with clear messages; split a mixed working tree. |
 | `codex-peer-sessions` | Run and message Codex sessions next to the current one. |
 | `linkedin-banner` | Design a LinkedIn banner with someone: interview them, find one visual idea that is theirs, render it with a script, check it at LinkedIn's display size, and upload it once they approve. Needs Python and Pillow. |
 | `peer-sessions` | Run and message other Claude Code sessions on the same machine. |

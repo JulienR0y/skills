@@ -1,6 +1,6 @@
 {
   "name": "julien-skills",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Skills for peer sessions, code review, tests, commits, merge conflicts, planning, Teams, VS Code and LinkedIn banners.",
   "author": { "name": "Julien Roy" },
   "repository": "https://github.com/JulienR0y/skills",
