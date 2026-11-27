@@ -41,10 +41,11 @@ it. A note does not block. A small addition to a class or file that is already t
 
 Moved and renamed code is recognised and not reported again.
 
-It checks every Python file an agent writes, inside a git repository or not. It compares with the version the agent
-sent (Claude Code's `originalFile`, or the edit undone) and, inside a repository, falls back to `HEAD`. A file outside
-a repository with no earlier version is judged whole. The repository-wide search for re-implemented helpers runs only
-inside a repository.
+It checks every Python file an agent writes, inside a git repository or not. It ignores tools that only read a file,
+such as Copilot's `view`. It compares each file with its version before the edit: Claude Code's `originalFile`, or
+the file with the edit call undone. Undoing works for the edit tools of Claude Code, Copilot and VS Code. Inside a
+repository it falls back to `HEAD`. A file outside a repository with no earlier version is judged whole. The
+repository-wide search for re-implemented helpers runs only inside a repository.
 
 ## Files
 

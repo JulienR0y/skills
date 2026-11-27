@@ -9,9 +9,8 @@ Follow Clean Code, SOLID and DRY in every change. Keep functions small and name 
 function and class one job. Do not copy code. Do not dispatch on strings. Do not swallow errors. Test behaviour,
 not internals.
 
-The hook checks each Python file you write. Layer 1 measures the syntax tree. Layer 2 asks TypeSafe's Jev model
-design questions about new or changed functions, when it is turned on. Both report only what your change added.
-For other languages, apply the same limits yourself.
+A hook checks each Python file you create or edit and reports only the problems your change added. It does not
+check other languages, so hold them to the same limits yourself.
 
 ## Before you write
 
@@ -25,7 +24,7 @@ For other languages, apply the same limits yourself.
 
 ## Limits
 
-Layer 1 enforces these for Python. Hold other languages to the same numbers.
+The hook enforces these for Python. Hold other languages to the same numbers.
 
 | Unit | Limit |
 |---|---|
@@ -52,44 +51,28 @@ Layer 1 enforces these for Python. Hold other languages to the same numbers.
 
 ## When the hook reports
 
-- A problem blocks your edit. It lists only problems this edit added. Fix them in your next edit. Each line says
-  how.
-- A note does not block. It appears for a small change to a class or file that is already too large, and for a Jev
-  question that is not yet calibrated to block. Make the change you were asked for and mention the note in your
-  handoff.
-- If the flagged code is right on purpose, add `# smell-ok: <reason>` on the flagged line or the line above it, and
-  name it in your handoff. Examples are an external API's required shape, a generated table, or a boundary that
-  must catch every error. A `# smell-ok` without a reason does not count.
-- A move or rename reports nothing. A move that also edits a line is compared with its old version. While a move is
-  half done, with the new copy written and the old one not yet deleted, the hook reports the same code in two
-  places. Finish the move.
+- Your edit is saved. A problem means the change is not finished. Fix each problem in your next edit, as its line
+  says. In Copilot the problem list replaces the tool result, so do not make the same edit again.
+- A note does not block. Finish your task and mention the note in your handoff.
+- To keep flagged code on purpose, add `# smell-ok: <reason>` on the flagged line or the line above it, and name it
+  in your handoff. Examples are an external API's required shape, a generated table, or a boundary that must catch
+  every error. A `# smell-ok` without a reason does not count.
+- While a move is half done, with the new copy written and the old one not yet deleted, the hook reports the same
+  code in two places. Finish the move.
 - Do not refactor code your task did not touch to make the hook quiet. Record it as a follow-up.
-
-## The Jev layer
-
-Layer 2 is on whenever `TYPESAFE_API_KEY` is set. No key ships with the plugin, so each user brings their own.
-`CLEAN_CODE_JEV=0` turns it off while keeping the key.
-
-When it is on, it sends each new or changed function of 8 or more lines to `api.typesafe.ai`, at most 6 per edit
-and at most 12,000 characters each. It asks four questions:
-
-- Does the function do more than one job? (SRP)
-- Does its name fail to describe what it does?
-- Does it branch on a string or type tag that a table should replace? (OCP)
-- Does it build dependencies that it should receive instead? (DIP)
-
-A question can block only after `scripts/jev_calibrate.py` showed at least 90% precision at its threshold. The
-result is stored in `scripts/jev_calibration.json`. Until then its answers are notes. If the API cannot be
-reached, the check is skipped.
 
 ## Before you hand off a branch
 
-From the repository root, run the checker against the target branch of the merge request. Fix every problem. Put
-the notes in the merge request description.
+1. Find the checker. It is `../../scripts/code_smells.py`, relative to this file's folder. In Claude Code it is
+   `${CLAUDE_PLUGIN_ROOT}/scripts/code_smells.py`.
+2. From the repository root, run it against the merge request's target branch:
 
-The checker is `scripts/code_smells.py` in this plugin's folder, `${CLAUDE_PLUGIN_ROOT}`. That folder is two levels
-above this skill's folder.
+   ```bash
+   python3 <checker> --diff origin/main
+   ```
 
-```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/scripts/code_smells.py" --diff origin/main
-```
+3. Fix every problem it lists. Put the notes in the merge request description.
+
+If the checker is not there, compare your diff with the limits above by hand.
+
+Setup, the optional Jev model layer, data handling and calibration are in the plugin's `README.md`.
