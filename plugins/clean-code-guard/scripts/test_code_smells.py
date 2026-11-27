@@ -148,11 +148,23 @@ def test_checks_code_outside_any_repository() -> None:
         assert run_script(str(clean)).returncode == 0
 
 
+def test_hook_checks_edits_not_reads() -> None:
+    with tempfile.TemporaryDirectory() as tmp:  # outside git, so a checked file is judged whole
+        smelly = Path(tmp) / "scratch.py"
+        smelly.write_text(BASE + "\n\n" + big_function(), encoding="utf-8", newline="\n")
+        reads = [{"toolName": "view", "toolArgs": {"path": str(smelly), "view_range": [1, 5]}},
+                 {"toolName": "read_file", "toolArgs": json.dumps({"filePath": str(smelly)})}]
+        for read in reads:
+            assert run_script("--hook", stdin=json.dumps({"cwd": tmp, **read})).stdout == "", read["toolName"]
+        edit = {"toolName": "edit", "cwd": tmp, "toolArgs": {"path": str(smelly), "old_str": "a + 1", "new_str": "a + 2"}}
+        assert json.loads(run_script("--hook", stdin=json.dumps(edit)).stdout)["decision"] == "block"
+
+
 def run_all() -> int:
     for test in (test_new_function_smells, test_moves_and_small_growth_stay_quiet, test_dispatch_smells,
                  test_duplication, test_test_file_and_container_smells, test_jev_ratchet,
                  test_jev_on_by_default_with_key_and_opt_out, test_hook_payload_per_agent,
-                 test_checks_code_outside_any_repository):
+                 test_checks_code_outside_any_repository, test_hook_checks_edits_not_reads):
         test()
     print("code_smells self-test: ok")
     return 0

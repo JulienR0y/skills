@@ -404,6 +404,11 @@ def locate(path: Path) -> tuple[Path | None, str]:
     return root, resolved.relative_to(root).as_posix() if root else resolved.as_posix()
 
 
+# Tools that write files, as Claude Code, Codex, the Copilot harness and VS Code's Local harness name them (VS Code's
+# Copilot bundle lists the same file tools). Copilot and Local run this hook after every tool, reads included.
+EDIT_TOOLS = {"write", "edit", "multiedit", "create", "insert", "str_replace", "str_replace_editor", "apply_patch",
+              "applypatch", "create_file", "createfile", "replace_string_in_file", "replacestring",
+              "multi_replace_string_in_file", "insert_edit_into_file"}
 PATH_KEYS = {"file_path", "filePath", "path", "filePaths", "files"}
 PATCH_FILE = re.compile(r"^\*\*\* (?:Add File|Update File|Move to): (.+)$", re.M)
 
@@ -446,6 +451,8 @@ def hook_payload(data: dict) -> tuple[str, dict, dict, list[Path]]:
 
 def hook() -> int:
     tool, given, result, paths = hook_payload(json.load(sys.stdin))
+    if tool.lower() not in EDIT_TOOLS:
+        return 0  # a read such as `view` names a file but changes nothing
     messages, blocking = [], False
     for path in paths:
         if path.suffix != ".py" or not path.is_file():
