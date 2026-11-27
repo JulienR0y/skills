@@ -332,13 +332,16 @@ def suppressed(lines: list[str], line: int) -> bool:
     return any(0 < ln <= len(lines) and SUPPRESS.search(lines[ln - 1]) for ln in (line, line - 1))
 
 
-def render(rel: str, findings: list[Finding]) -> str:
+def render(rel: str, findings: list[Finding], before: str | None) -> str:
     fixes, notes = [f for f in findings if not f.note], [f for f in findings if f.note]
     lines = []
     if fixes:
-        lines += [f"Clean Code / SOLID / DRY check on {rel}: {len(fixes)} problem(s) this change introduced.",
-                  "Fix each one now, or keep it on purpose with `# smell-ok: <reason>` on its line and name it in your "
-                  "handoff. Leave code this change did not touch alone; list it as a follow-up instead."]
+        scope = ("this change introduced" if before is not None
+                 else "in the whole file, because there was no earlier version to compare with")
+        lines += [f"Clean Code / SOLID / DRY check on {rel}: {len(fixes)} problem(s) {scope}.",
+                  "Fix each one in code you wrote or changed, or keep it on purpose with `# smell-ok: <reason>` on its "
+                  "line and name it in your handoff. Leave code you did not touch alone, and list its problems as "
+                  "follow-ups."]
         lines += [f"- L{f.line} [{f.tag}] {f.text}" for f in fixes[:LIMIT["report"]]]
         if len(fixes) > LIMIT["report"]:
             lines.append(f"- ...and {len(fixes) - LIMIT['report']} more.")
@@ -473,7 +476,7 @@ def hook() -> int:
         before = before_edit(tool if len(paths) == 1 else "", given, result, after, root, rel)
         findings = check(before, after, rel, root)
         if findings:
-            messages.append(render(rel, findings))
+            messages.append(render(rel, findings, before))
             blocking = blocking or any(not f.note for f in findings)
     if messages:
         print(json.dumps(hook_output("\n\n".join(messages), blocking)))
@@ -522,7 +525,7 @@ def diff(base: str) -> int:
     befores = git_files(root, base, changed + gone)
     afters = {rel: (root / rel).read_text(encoding="utf-8", errors="replace") for rel in changed if (root / rel).is_file()}
     ctx = diff_context(befores, afters, changed)
-    problems = sum(report(rel, check(befores.get(rel), after, rel, root, ctx)) for rel, after in afters.items())
+    problems = sum(check_and_report(befores.get(rel), after, rel, root, ctx) for rel, after in afters.items())
     print(f"{problems} problem(s) to fix in {len(afters)} changed Python file(s) against {base}.")
     return 1 if problems else 0
 
@@ -532,15 +535,15 @@ def check_files(names: list[str]) -> int:
     problems = 0
     for name in names:
         root, rel = locate(Path(name))
-        problems += report(rel, check(None, Path(name).read_text(encoding="utf-8", errors="replace"), rel, root))
+        problems += check_and_report(None, Path(name).read_text(encoding="utf-8", errors="replace"), rel, root)
     print(f"{problems} problem(s) to fix in {len(names)} file(s).")
     return 1 if problems else 0
 
 
-def report(rel: str, findings: list[Finding]) -> int:
-    """Print one file's findings; return how many are problems to fix."""
+def check_and_report(before: str | None, after: str, rel: str, root: Path | None, ctx: DiffContext | None = None) -> int:
+    findings = check(before, after, rel, root, ctx)
     if findings:
-        print(render(rel, findings), end="\n\n")
+        print(render(rel, findings, before), end="\n\n")
     return sum(not f.note for f in findings)
 
 

@@ -9,8 +9,9 @@ Follow Clean Code, SOLID and DRY in every change. Keep functions small and name 
 function and class one job. Do not copy code. Do not dispatch on strings. Do not swallow errors. Test behaviour,
 not internals.
 
-A hook checks each Python file you create or edit and reports only the problems your change added. It does not
-check other languages, so hold them to the same limits yourself.
+A hook checks each Python file you create or edit and reports the problems your change added. When it has no earlier
+version of a file to compare with, it checks the whole file and says so. It does not check other languages, so hold
+them to the same limits yourself.
 
 ## Before you write
 
