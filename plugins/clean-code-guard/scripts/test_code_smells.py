@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -11,9 +12,14 @@ import jev_review
 from pathlib import Path
 
 from code_smells import check, hook_output, hook_payload, reverse
+from smell_rules import LIMIT
 
 BASE = "def small(a):\n    return a + 1\n"
 SCRIPT = Path(__file__).with_name("code_smells.py")
+PLUGIN = Path(__file__).resolve().parents[1]
+LIMIT_KEYS_PER_SKILL_ROW = {"Function": ("lines", "ifs", "depth", "params", "nested"), "Condition": ("terms",),
+                            "Class": ("class_lines", "class_methods"), "File": ("file_lines",),
+                            "Dispatch": ("literal", "elif")}
 # How each agent names an edit call's fields: tool-name field, arguments field, then the path, old and new text.
 EDIT_ARGS = {"Edit": ("tool_name", "tool_input", "file_path", "old_string", "new_string"),
              "edit": ("toolName", "toolArgs", "path", "old_str", "new_str"),
@@ -194,12 +200,29 @@ def test_report_says_when_it_checked_the_whole_file() -> None:
             assert "problem(s) in the whole file" in report and "this change introduced" not in report, report
 
 
+def test_skill_states_the_limits_the_checker_uses() -> None:
+    skill = (PLUGIN / "skills" / "clean-code-guard" / "SKILL.md").read_text(encoding="utf-8")
+    table = skill.split("\n## Limits\n")[1].split("\n## ")[0]
+    rows = (line.split("|") for line in table.splitlines() if line.startswith("|"))
+    stated = {cells[1].strip(): numbers for cells in rows if (numbers := [int(n) for n in re.findall(r"\d+", cells[2])])}
+    expected = {row: [LIMIT[key] for key in keys] for row, keys in LIMIT_KEYS_PER_SKILL_ROW.items()}
+    assert stated == expected, f"SKILL.md Limits table says {stated}, smell_rules.LIMIT says {expected}"
+
+
+def test_readme_states_what_jev_sends() -> None:
+    flat_readme = " ".join((PLUGIN / "README.md").read_text(encoding="utf-8").split())
+    for claim in (f"at most {jev_review.MAX_FUNCTIONS} functions per edit", f"shorter than {jev_review.MIN_LINES} lines",
+                  f"at {jev_review.MAX_STATE:,} characters"):
+        assert claim in flat_readme, f"README.md should say {claim!r}"
+
+
 def run_all() -> int:
     for test in (test_new_function_smells, test_moves_and_small_growth_stay_quiet, test_dispatch_smells,
                  test_duplication, test_test_file_and_container_smells, test_jev_ratchet,
                  test_jev_on_by_default_with_key_and_opt_out, test_hook_payload_per_agent,
                  test_checks_code_outside_any_repository, test_hook_checks_edits_not_reads,
-                 test_hook_judges_an_edit_on_what_it_added, test_report_says_when_it_checked_the_whole_file):
+                 test_hook_judges_an_edit_on_what_it_added, test_report_says_when_it_checked_the_whole_file,
+                 test_skill_states_the_limits_the_checker_uses, test_readme_states_what_jev_sends):
         test()
     print("code_smells self-test: ok")
     return 0

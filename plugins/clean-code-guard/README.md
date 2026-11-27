@@ -11,25 +11,10 @@ rules to follow by hand.
 
 The checker has two layers.
 
-Layer 1 reads the Python syntax tree. It needs no network. It reports these problems when an edit adds them:
-
-| Problem | Limit |
-|---|---|
-| Long function | 50 lines |
-| Too many `if` statements in a function | 10 |
-| Deep nesting | 4 levels |
-| Too many parameters | 6 |
-| Long condition | 5 `and`/`or` terms |
-| Too many inner functions | 2 |
-| Large class | 400 lines or 20 methods |
-| Large file | 800 lines |
-| The same string compared again and again | 3 times in a file |
-| Long `if`/`elif` chain | 5 branches |
-| Boolean flag parameter | any new one |
-| `except Exception` that neither re-raises nor logs | any new one |
-| Import inside a function | any new one |
-| Copied code, or a helper that already exists elsewhere in the repository | any new one |
-| Test that calls a private method, or matches an error's message text | any new one |
+Layer 1 reads the Python syntax tree. It needs no network. It reports a problem when an edit breaks a rule in the
+skill's [Limits table](skills/clean-code-guard/SKILL.md#limits), for example a function that grows too long, a
+boolean flag parameter, or code copied from elsewhere in the repository. That table is the only written copy of the
+limits. A test fails when it differs from `LIMIT` in `scripts/smell_rules.py`.
 
 Layer 2 runs when you have a TypeSafe API key. It sends each new or changed function to TypeSafe's Jev model and asks four questions. Does the
 function do more than one job? Does its name fail to describe what it does? Does it branch on a string or type tag
