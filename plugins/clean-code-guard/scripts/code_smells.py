@@ -383,13 +383,24 @@ def git_files(root: Path, rev: str, paths: list[str]) -> dict[str, str | None]:
     return out
 
 
+OLD_TEXT_KEYS = ("old_string", "old_str", "oldString")  # Claude Code, the Copilot harness, VS Code's Local harness
+NEW_TEXT_KEYS = ("new_string", "new_str", "newString")
+
+
+def edit_pairs(given: dict) -> list[tuple[str, str, bool]]:
+    """(old, new, replace_all) for each replacement an edit call made, whichever agent sent it."""
+    edits = given.get("edits") or given.get("replacements") or [given]
+    return [(next((e[k] for k in OLD_TEXT_KEYS if k in e), ""), next(e[k] for k in NEW_TEXT_KEYS if k in e),
+             bool(e.get("replace_all"))) for e in edits if any(k in e for k in NEW_TEXT_KEYS)]
+
+
 def before_edit(tool: str, given: dict, result: dict, after: str, root: Path | None, rel: str) -> str | None:
     """The file as it was before this tool call, or None for a new file."""
     if result.get("originalFile") is not None:
         return result["originalFile"]
-    edits = {"Edit": [given], "MultiEdit": given.get("edits", [])}.get(tool)
-    if edits is not None:
-        undone = reverse(after, [(e.get("old_string", ""), e.get("new_string", ""), bool(e.get("replace_all"))) for e in edits])
+    pairs = edit_pairs(given) if tool else []
+    if pairs:
+        undone = reverse(after, pairs)
         if undone is not None:
             return undone
     if tool == "Write" and result.get("type") == "create" or root is None:

@@ -14,6 +14,15 @@ from code_smells import check, hook_output, hook_payload, reverse
 
 BASE = "def small(a):\n    return a + 1\n"
 SCRIPT = Path(__file__).with_name("code_smells.py")
+# How each agent names an edit call's fields: tool-name field, arguments field, then the path, old and new text.
+EDIT_ARGS = {"Edit": ("tool_name", "tool_input", "file_path", "old_string", "new_string"),
+             "edit": ("toolName", "toolArgs", "path", "old_str", "new_str"),
+             "replace_string_in_file": ("toolName", "toolArgs", "filePath", "oldString", "newString")}
+
+
+def edit_payload(tool: str, path: Path, old: str, new: str) -> dict:
+    name, args, path_key, old_key, new_key = EDIT_ARGS[tool]
+    return {name: tool, "cwd": str(path.parent), args: {path_key: str(path), old_key: old, new_key: new}}
 
 
 def run_script(*args: str, stdin: str = "") -> subprocess.CompletedProcess:
@@ -156,15 +165,29 @@ def test_hook_checks_edits_not_reads() -> None:
                  {"toolName": "read_file", "toolArgs": json.dumps({"filePath": str(smelly)})}]
         for read in reads:
             assert run_script("--hook", stdin=json.dumps({"cwd": tmp, **read})).stdout == "", read["toolName"]
-        edit = {"toolName": "edit", "cwd": tmp, "toolArgs": {"path": str(smelly), "old_str": "a + 1", "new_str": "a + 2"}}
-        assert json.loads(run_script("--hook", stdin=json.dumps(edit)).stdout)["decision"] == "block"
+        create = {"toolName": "create", "cwd": tmp, "toolArgs": {"path": str(smelly), "file_text": smelly.read_text()}}
+        assert json.loads(run_script("--hook", stdin=json.dumps(create)).stdout)["decision"] == "block"
+
+
+def test_hook_judges_an_edit_on_what_it_added() -> None:
+    with tempfile.TemporaryDirectory() as tmp:  # outside git, only the edit call shows what was there before
+        smelly = Path(tmp) / "scratch.py"
+        for tool in EDIT_ARGS:
+            smelly.write_text(BASE.replace("a + 1", "a + 2") + "\n\n" + big_function(), encoding="utf-8", newline="\n")
+            quiet = run_script("--hook", stdin=json.dumps(edit_payload(tool, smelly, "a + 1", "a + 2")))
+            assert quiet.stdout == "", tool
+            added = "import json\n    return json.dumps(a)"
+            smelly.write_text(BASE.replace("return a + 1", added) + "\n\n" + big_function(), encoding="utf-8", newline="\n")
+            hooked = run_script("--hook", stdin=json.dumps(edit_payload(tool, smelly, "return a + 1", added)))
+            assert ": 1 problem(s)" in json.loads(hooked.stdout)["reason"], tool
 
 
 def run_all() -> int:
     for test in (test_new_function_smells, test_moves_and_small_growth_stay_quiet, test_dispatch_smells,
                  test_duplication, test_test_file_and_container_smells, test_jev_ratchet,
                  test_jev_on_by_default_with_key_and_opt_out, test_hook_payload_per_agent,
-                 test_checks_code_outside_any_repository, test_hook_checks_edits_not_reads):
+                 test_checks_code_outside_any_repository, test_hook_checks_edits_not_reads,
+                 test_hook_judges_an_edit_on_what_it_added):
         test()
     print("code_smells self-test: ok")
     return 0
