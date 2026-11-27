@@ -70,7 +70,8 @@ edit is checked twice.
 
 To add the hook to VS Code Copilot without a plugin, run `python3 scripts/install_copilot.py` from a clone. It copies
 the checker and its Jev calibration to `~/.copilot/hooks/clean-code-guard/` and writes `~/.copilot/hooks/clean-code-guard.json`. Reload VS
-Code afterwards and run it again after each update.
+Code afterwards and run it again after each update. If `~/.copilot/hooks/tool-dispatch.json` exists, that dispatcher
+already runs the checker, so the installer only copies the scripts and removes `clean-code-guard.json`.
 
 ## Run it from the command line
 

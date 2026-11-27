@@ -216,13 +216,30 @@ def test_readme_states_what_jev_sends() -> None:
         assert claim in flat_readme, f"README.md should say {claim!r}"
 
 
+def install_copilot(copilot_home: str) -> None:
+    subprocess.run([sys.executable, str(SCRIPT.with_name("install_copilot.py"))], check=True, capture_output=True,
+                   env={**os.environ, "COPILOT_HOME": copilot_home})
+
+
+def test_copilot_install_leaves_the_checker_to_tool_dispatch() -> None:
+    with tempfile.TemporaryDirectory() as copilot_home:
+        hook_file = Path(copilot_home) / "hooks" / "clean-code-guard.json"
+        install_copilot(copilot_home)
+        assert json.loads(hook_file.read_text(encoding="utf-8"))["hooks"]["postToolUse"]
+        (hook_file.parent / "tool-dispatch.json").write_text("{}", encoding="utf-8")
+        install_copilot(copilot_home)
+        assert not hook_file.exists()
+        assert (hook_file.parent / "clean-code-guard" / "code_smells.py").read_bytes() == SCRIPT.read_bytes()
+
+
 def run_all() -> int:
     for test in (test_new_function_smells, test_moves_and_small_growth_stay_quiet, test_dispatch_smells,
                  test_duplication, test_test_file_and_container_smells, test_jev_ratchet,
                  test_jev_on_by_default_with_key_and_opt_out, test_hook_payload_per_agent,
                  test_checks_code_outside_any_repository, test_hook_checks_edits_not_reads,
                  test_hook_judges_an_edit_on_what_it_added, test_report_says_when_it_checked_the_whole_file,
-                 test_skill_states_the_limits_the_checker_uses, test_readme_states_what_jev_sends):
+                 test_skill_states_the_limits_the_checker_uses, test_readme_states_what_jev_sends,
+                 test_copilot_install_leaves_the_checker_to_tool_dispatch):
         test()
     print("code_smells self-test: ok")
     return 0
